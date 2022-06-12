@@ -1,8 +1,8 @@
-package hku.picshare.service;
+package hku.droneflight.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import hku.picshare.entity.User;
-import hku.picshare.util.ResponseMsg;
+import hku.droneflight.entity.User;
+import hku.droneflight.util.ResponseMsg;
 
 /**
  * @author yhp

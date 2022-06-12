@@ -1,7 +1,7 @@
-package hku.picshare.mapper;
+package hku.droneflight.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import hku.picshare.entity.Photo;
+import hku.droneflight.entity.Photo;
 import org.springframework.stereotype.Repository;
 
 

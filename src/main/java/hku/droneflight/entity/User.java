@@ -1,4 +1,4 @@
-package hku.picshare.entity;
+package hku.droneflight.entity;
 
 import java.io.Serializable;
 

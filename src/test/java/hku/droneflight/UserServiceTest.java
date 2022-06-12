@@ -1,8 +1,7 @@
-package hku.picshare;
+package hku.droneflight;
 
-import hku.picshare.entity.User;
-import hku.picshare.mapper.UserMapper;
-import hku.picshare.service.UserService;
+import hku.droneflight.entity.User;
+import hku.droneflight.service.UserService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +9,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
 
 /**
  *

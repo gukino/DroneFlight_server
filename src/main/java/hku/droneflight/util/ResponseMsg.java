@@ -1,6 +1,6 @@
-package hku.picshare.util;
+package hku.droneflight.util;
 
-import hku.picshare.entity.User;
+import hku.droneflight.entity.User;
 import lombok.Data;
 
 /**

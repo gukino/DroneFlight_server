@@ -1,7 +1,7 @@
-package hku.picshare.service;
+package hku.droneflight.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import hku.picshare.entity.Photo;
+import hku.droneflight.entity.Photo;
 
 /**
  * @author yhp

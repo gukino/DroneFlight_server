@@ -1,10 +1,9 @@
-package hku.picshare.controller;
+package hku.droneflight.controller;
 
 
-import hku.picshare.entity.User;
-import hku.picshare.service.UserService;
-import hku.picshare.util.RequestMsg;
-import hku.picshare.util.ResponseMsg;
+import hku.droneflight.service.UserService;
+import hku.droneflight.util.RequestMsg;
+import hku.droneflight.util.ResponseMsg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

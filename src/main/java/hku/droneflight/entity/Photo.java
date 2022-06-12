@@ -1,4 +1,4 @@
-package hku.picshare.entity;
+package hku.droneflight.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package hku.picshare.util;
+package hku.droneflight.util;
 
 public enum Result {
     SUCCESS,

@@ -1,11 +1,11 @@
-package hku.picshare.service.Impl;
+package hku.droneflight.service.Impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import hku.picshare.entity.User;
-import hku.picshare.mapper.UserMapper;
-import hku.picshare.service.UserService;
-import hku.picshare.util.ResponseMsg;
-import hku.picshare.util.Result;
+import hku.droneflight.entity.User;
+import hku.droneflight.mapper.UserMapper;
+import hku.droneflight.service.UserService;
+import hku.droneflight.util.ResponseMsg;
+import hku.droneflight.util.Result;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

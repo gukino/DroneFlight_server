@@ -1,11 +1,11 @@
-package hku.picshare;
+package hku.droneflight;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("hku.picshare.mapper")
+@MapperScan("hku.droneflight.mapper")
 public class DroneFlightApplication {
 
 
