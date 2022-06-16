@@ -5,6 +5,8 @@ import hku.droneflight.entity.User;
 import hku.droneflight.entity.Video;
 import hku.droneflight.mapper.VideoMapper;
 import hku.droneflight.service.UserService;
+import hku.droneflight.service.VideoService;
+import hku.droneflight.util.VideoReq;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,9 @@ public class VideoServiceTest {
 
     @Autowired
     VideoMapper videoMapper;
+    @Autowired
+    VideoService videoService;
+
     @Before
     public void before() throws Exception {
     }
@@ -31,8 +36,24 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testQueryUser() throws Exception {
+    public void testQueryVideo() throws Exception {
         System.out.println(videoMapper.selectList(new QueryWrapper<Video>().lambda().eq(Video::getUid,1)).toString());
+    }
+
+    @Test
+    public void testQueryVideoList() throws Exception {
+        System.out.println(videoService.getListByUid(1).toString());
+    }
+
+    @Test
+    public void testUpdateVideo() throws Exception {
+        VideoReq v = new VideoReq(1,2,"t1","up");
+        System.out.println(videoService.updateVideo(v));
+    }
+
+    @Test
+    public void testDeleteVideo() throws Exception {
+        System.out.println(videoService.getListByUid(1).toString());
     }
 
 }

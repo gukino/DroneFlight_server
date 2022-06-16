@@ -35,7 +35,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     @Override
-    public boolean addVideo(VideoReq videoReq) {
+    public boolean addVideo(Video video) {
         //TODO
         return true;
     }

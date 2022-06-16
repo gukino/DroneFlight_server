@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *  查询用户的所有视频列表
+ *  查询管理用户的所有视频列表
  */
 
 @RestController
@@ -36,10 +36,15 @@ public class ListController {
         return rsp;
     }
 
+    /**
+     * TODO 应由算法服务器发送请求和上传视频
+     * @param video
+     * @return
+     */
     @RequestMapping(value = "/addVideo")
     @ResponseBody
-    public ResponseMsg addVideo(@RequestBody VideoReq videoReq){
-        if (videoService.addVideo(videoReq)){
+    public ResponseMsg addVideo(@RequestBody Video video){
+        if (videoService.addVideo(video)){
             return new ResponseMsg(Result.SUCCESS);
         }
         return new ResponseMsg(Result.FAIL);
