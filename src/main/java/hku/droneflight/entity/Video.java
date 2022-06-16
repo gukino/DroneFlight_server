@@ -18,6 +18,6 @@ public class Video {
     private Integer id;
     private Integer uid;
     private String name;
-    private String desc;
+    private String description;
     private String url;
 }
