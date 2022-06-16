@@ -5,15 +5,19 @@ import lombok.Data;
 import lombok.ToString;
 
 /**
- * @author yhp
- * @create 2022-04-20 23:00
- * photo类
+ * @author hqj
+ * @create 2022-06-15 23:00
+ * video类
+ * 暂定
+ * 直接调uid
  */
+
 @Data
 @ToString
-public class Photo {
+public class Video {
     private Integer id;
-    @TableField(value = "form_id")
-    private Integer formId;
+    private Integer uid;
+    private String name;
+    private String desc;
     private String url;
 }

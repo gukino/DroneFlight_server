@@ -1,14 +1,9 @@
 package hku.droneflight.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import hku.droneflight.entity.Photo;
+import hku.droneflight.entity.Video;
 import org.springframework.stereotype.Repository;
 
-
-/**
- * @author yhp
- * @create 2022-04-20 23:07
- */
 @Repository
-public interface PhotoMapper extends BaseMapper<Photo> {
+public interface VideoMapper extends BaseMapper<Video> {
 }
