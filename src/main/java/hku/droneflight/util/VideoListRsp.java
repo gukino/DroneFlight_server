@@ -17,4 +17,5 @@ public class VideoListRsp extends ResponseMsg {
     public VideoListRsp(Result result, String reason) {
         super(result, reason);
     }
+
 }
