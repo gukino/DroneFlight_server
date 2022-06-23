@@ -35,8 +35,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     @Override
-    public boolean addVideo(Video video) {
-        //TODO
-        return true;
+    public int addVideo(Video video) {
+
+        return videoMapper.insert(video);
     }
 }

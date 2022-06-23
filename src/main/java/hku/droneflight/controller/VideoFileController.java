@@ -18,24 +18,24 @@ import java.io.IOException;
 import java.util.Map;
 
 @Controller
-public class ImageFileController {
+public class VideoFileController {
     private final ResourceLoader resourceLoader;
     @Value("${file.images.path}")
     private String path;
 
     @Autowired
-    public ImageFileController(ResourceLoader resourceLoader) {
+    public VideoFileController(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
-    @RequestMapping(value = "imageTest")
-    @ResponseBody()
-    public ResponseObject test() {
-        ResponseObject entity = new ResponseObject();
-        entity.result = "success";
-        entity.failReason = "";
-        return entity;
-    }
+//    @RequestMapping(value = "imageTest")
+//    @ResponseBody()
+//    public ResponseObject test() {
+//        ResponseObject entity = new ResponseObject();
+//        entity.result = "success";
+//        entity.failReason = "";
+//        return entity;
+//    }
 
     @RequestMapping(value = "image", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<?> showPhotos(String fileName) {

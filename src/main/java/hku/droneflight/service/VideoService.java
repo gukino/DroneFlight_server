@@ -8,5 +8,5 @@ import java.util.List;
 public interface VideoService extends IService<Video>{
     List<Video> getListByUid(int uid);
     boolean updateVideo(VideoReq videoReq);
-    boolean addVideo(Video video);
+    int addVideo(Video video);
 }

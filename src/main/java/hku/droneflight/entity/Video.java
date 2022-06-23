@@ -1,6 +1,6 @@
 package hku.droneflight.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
+import hku.droneflight.util.VideoReq;
 import java.util.Date;
 import lombok.Data;
 import lombok.ToString;
@@ -21,5 +21,12 @@ public class Video {
     private String name;
     private String description;
     private String url;
-    private Date createTime;
+    private long createTime;
+
+    public Video(VideoReq videoReq) {
+        this.uid = videoReq.uid;
+        this.name = videoReq.name;
+        this.description = videoReq.description;
+        this.createTime = new Date().getTime();
+    }
 }
