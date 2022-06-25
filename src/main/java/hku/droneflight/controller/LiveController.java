@@ -8,10 +8,14 @@ import hku.droneflight.util.ResponseMsg;
 import hku.droneflight.util.Result;
 import hku.droneflight.util.UrlRsp;
 import hku.droneflight.util.VideoReq;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -22,9 +26,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class LiveController {
 
-    private List<String> streamUrls;
-    private List<String> resultUrls;
-    private Map<String,Integer> streamVideoMap;
+    static List<String> streamUrls = new ArrayList<>();
+    static List<String> resultUrls = new ArrayList<>();
+    static Map<String,Integer> streamVideoMap = new HashMap<>();
 
     @Autowired
     VideoService videoService;
@@ -35,7 +39,7 @@ public class LiveController {
      */
     @RequestMapping(value = "/startLive")
     @ResponseBody
-    ResponseMsg startLive(LiveReq liveReq){
+    ResponseMsg startLive(@RequestBody LiveReq liveReq){
         streamUrls.add(liveReq.streamUrl);
 
         return new ResponseMsg(Result.SUCCESS);
@@ -67,7 +71,7 @@ public class LiveController {
      */
     @RequestMapping(value = "/stopLive")
     @ResponseBody
-    ResponseMsg stopLive(LiveReq liveReq){
+    ResponseMsg stopLive(@RequestBody LiveReq liveReq){
         streamUrls.remove(liveReq.streamUrl);
         return new ResponseMsg(Result.SUCCESS);
     }
@@ -79,7 +83,7 @@ public class LiveController {
      */
     @RequestMapping(value = "/stopAndSaveLive")
     @ResponseBody
-    ResponseMsg stopAndSaveLive(VideoReq videoReq){
+    ResponseMsg stopAndSaveLive(@RequestBody VideoReq videoReq){
         if (videoReq.streamUrl != null){
             streamUrls.remove(videoReq.streamUrl);
 
@@ -100,7 +104,7 @@ public class LiveController {
      */
     @RequestMapping(value = "/isLiveStop")
     @ResponseBody
-    LiveListRsp isLiveStop(String streamUrl){
+    LiveListRsp isLiveStop(@RequestBody String streamUrl){
 
         for (String urls : streamUrls){
             if (streamUrl.equals(urls)){
