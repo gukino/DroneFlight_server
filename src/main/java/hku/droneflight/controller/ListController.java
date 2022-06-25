@@ -36,19 +36,19 @@ public class ListController {
         return rsp;
     }
 
-    /**
-     * TODO 应由算法服务器发送请求和上传视频
-     * @param video
-     * @return
-     */
-    @RequestMapping(value = "/addVideo")
-    @ResponseBody
-    public ResponseMsg addVideo(@RequestBody Video video){
-        if (videoService.addVideo(video)){
-            return new ResponseMsg(Result.SUCCESS);
-        }
-        return new ResponseMsg(Result.FAIL);
-    }
+//    /**
+//     * TODO 应由算法服务器发送请求和上传视频
+//     * @param video
+//     * @return
+//     */
+//    @RequestMapping(value = "/addVideo")
+//    @ResponseBody
+//    public ResponseMsg addVideo(@RequestBody Video video){
+//        if (videoService.addVideo(video)){
+//            return new ResponseMsg(Result.SUCCESS);
+//        }
+//        return new ResponseMsg(Result.FAIL);
+//    }
 
     @RequestMapping(value = "/updateVideo")
     @ResponseBody

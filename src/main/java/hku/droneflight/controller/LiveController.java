@@ -3,14 +3,15 @@ package hku.droneflight.controller;
 import hku.droneflight.entity.Video;
 import hku.droneflight.service.VideoService;
 import hku.droneflight.util.LiveListRsp;
+import hku.droneflight.util.LiveReq;
 import hku.droneflight.util.ResponseMsg;
 import hku.droneflight.util.Result;
+import hku.droneflight.util.UrlRsp;
 import hku.droneflight.util.VideoReq;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -34,8 +35,8 @@ public class LiveController {
      */
     @RequestMapping(value = "/startLive")
     @ResponseBody
-    ResponseMsg startLive(String liveReq){
-        streamUrls.add(liveReq);
+    ResponseMsg startLive(LiveReq liveReq){
+        streamUrls.add(liveReq.streamUrl);
 
         return new ResponseMsg(Result.SUCCESS);
     }
@@ -47,18 +48,23 @@ public class LiveController {
      */
     @RequestMapping(value = "/isLiveStart")
     @ResponseBody
-    LiveListRsp isLiveStart(){
+    UrlRsp isLiveStart(){
 
         if (streamUrls.isEmpty()){
-            return new LiveListRsp(Result.FAIL);
+            return new UrlRsp(Result.FAIL);
         }else{
-            LiveListRsp liveListRsp = new LiveListRsp(Result.SUCCESS);
-            liveListRsp.streamUrls = streamUrls;
-            return liveListRsp;
+            UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
+            urlRsp.url =  streamUrls.get(0);
+            streamUrls.remove(0);
+            return urlRsp;
         }
     }
 
-
+    /**
+     * 停止直播，不保存信息
+     * @param streamUrl
+     * @return
+     */
     @RequestMapping(value = "/stopLive")
     @ResponseBody
     ResponseMsg stopLive(String streamUrl){
