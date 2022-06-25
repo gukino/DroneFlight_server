@@ -62,13 +62,13 @@ public class LiveController {
 
     /**
      * 停止直播，不保存信息
-     * @param streamUrl
+     * @param liveReq
      * @return
      */
     @RequestMapping(value = "/stopLive")
     @ResponseBody
-    ResponseMsg stopLive(String streamUrl){
-        streamUrls.remove(streamUrl);
+    ResponseMsg stopLive(LiveReq liveReq){
+        streamUrls.remove(liveReq.streamUrl);
         return new ResponseMsg(Result.SUCCESS);
     }
 
