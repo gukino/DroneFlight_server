@@ -1,5 +1,7 @@
 package hku.droneflight.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import hku.droneflight.util.VideoReq;
 import java.util.Date;
 import lombok.Data;
@@ -16,6 +18,7 @@ import lombok.ToString;
 @Data
 @ToString
 public class Video {
+    @TableId(type = IdType.AUTO)
     private Integer id;
     private Integer uid;
     private String name;

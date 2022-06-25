@@ -45,11 +45,11 @@ public class VideoServiceTest {
         System.out.println(videoService.getListByUid(1).toString());
     }
 
-    @Test
-    public void testUpdateVideo() throws Exception {
-        VideoReq v = new VideoReq(1,2,"t1","up");
-        System.out.println(videoService.updateVideo(v));
-    }
+//    @Test
+//    public void testUpdateVideo() throws Exception {
+//        VideoReq v = new VideoReq(1,2,"t1","up");
+//        System.out.println(videoService.updateVideo(v));
+//    }
 
     @Test
     public void testDeleteVideo() throws Exception {

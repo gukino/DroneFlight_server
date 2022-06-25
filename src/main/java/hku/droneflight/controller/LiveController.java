@@ -10,7 +10,6 @@ import hku.droneflight.util.UrlRsp;
 import hku.droneflight.util.VideoReq;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,7 @@ public class LiveController {
     static List<String> streamUrls = new ArrayList<>();
     static List<String> resultUrls = new ArrayList<>();
     static Map<String,Integer> streamVideoMap = new HashMap<>();
+    static Map<String,Integer> streamUidMap = new HashMap<>();
 
     @Autowired
     VideoService videoService;
@@ -58,7 +58,8 @@ public class LiveController {
             return new UrlRsp(Result.FAIL);
         }else{
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
-            urlRsp.url =  streamUrls.get(0);
+            urlRsp.streamUrl =  streamUrls.get(0);
+            urlRsp.resultUrl =  streamUrls.get(0);//Todo
             streamUrls.remove(0);
             return urlRsp;
         }
