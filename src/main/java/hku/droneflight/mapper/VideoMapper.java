@@ -5,7 +5,7 @@ import hku.droneflight.entity.Video;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
-@Repository
+
 public interface VideoMapper extends BaseMapper<Video> {
 
 }

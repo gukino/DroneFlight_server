@@ -18,44 +18,63 @@ import java.io.IOException;
 import java.util.Map;
 
 @Controller
-public class VideoFileController {
+public class FileController {
     private final ResourceLoader resourceLoader;
-    @Value("${file.images.path}")
-    private String path;
+    @Value("${file.video.path}")
+    private String videoBasePath;
+
+    @Value("${file.result.path}")
+    private String resultBasePath;
+
 
     @Autowired
-    public VideoFileController(ResourceLoader resourceLoader) {
+    public FileController(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
-//    @RequestMapping(value = "imageTest")
-//    @ResponseBody()
-//    public ResponseObject test() {
-//        ResponseObject entity = new ResponseObject();
-//        entity.result = "success";
-//        entity.failReason = "";
-//        return entity;
-//    }
 
-    @RequestMapping(value = "image", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<?> showPhotos(String fileName) {
-
+    @RequestMapping(value = "video", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> showVideo(String fileName) {
         try {
-            return ResponseEntity.ok(resourceLoader.getResource("file:" + path + fileName));
+            return ResponseEntity.ok(resourceLoader.getResource(videoBasePath + fileName));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @RequestMapping(value = "result", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> showResult(String fileName) {
+        try {
+            return ResponseEntity.ok(resourceLoader.getResource(resultBasePath + fileName));
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @RequestMapping("imageUpload")
+
+    @RequestMapping("videoUpload")
     @ResponseBody()
-    public ResponseObject upload(@RequestParam("fileName") MultipartFile file, Map<String, Object> map){
+    public ResponseObject videoUpload(@RequestParam("fileName") MultipartFile file, Map<String, Object> map){
         // 上传成功或者失败的提示
         ResponseObject ret = null;
-        if (upload(file, path, file.getOriginalFilename())){
+        if (upload(file, videoBasePath, file.getOriginalFilename())){
             // 上传成功，给出页面提示
             ret = getResult("success");
-            ret.urlSuffix = "image?fileName=" + file.getOriginalFilename();
+            ret.urlSuffix = "video?fileName=" + file.getOriginalFilename();
+        }else {
+            ret = getResult("fail");
+        }
+        return ret;
+    }
+
+    @RequestMapping("resultUpload")
+    @ResponseBody()
+    public ResponseObject resultUpload(@RequestParam("fileName") MultipartFile file, Map<String, Object> map){
+        // 上传成功或者失败的提示
+        ResponseObject ret = null;
+        if (upload(file, resultBasePath, file.getOriginalFilename())){
+            // 上传成功，给出页面提示
+            ret = getResult("success");
+            ret.urlSuffix = "result?fileName=" + file.getOriginalFilename();
         }else {
             ret = getResult("fail");
         }

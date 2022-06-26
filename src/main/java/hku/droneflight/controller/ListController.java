@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ListController {
     @Autowired
-    VideoMapper videoMapper;
-    @Autowired
     VideoService videoService;
 
     @RequestMapping(value = "/getList")
@@ -62,7 +60,7 @@ public class ListController {
     @RequestMapping(value = "/deleteVideo")
     @ResponseBody
     public VideoListRsp deleteVideo(@RequestBody VideoReq videoReq){
-        videoMapper.deleteById(videoReq.id);
+        videoService.removeById(videoReq.id);
         return new VideoListRsp(Result.SUCCESS);
     }
 

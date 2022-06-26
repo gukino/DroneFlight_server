@@ -8,11 +8,11 @@ import hku.droneflight.util.ResponseMsg;
 import hku.droneflight.util.Result;
 import hku.droneflight.util.UrlRsp;
 import hku.droneflight.util.VideoReq;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,12 +26,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class LiveController {
 
     static List<String> streamUrls = new ArrayList<>();
-    static List<String> resultUrls = new ArrayList<>();
     static Map<String,Integer> streamVideoMap = new HashMap<>();
     static Map<String,Integer> streamUidMap = new HashMap<>();
 
     @Autowired
     VideoService videoService;
+
+    @Value("${result.url}")
+    private String urlBasePath;
 
     /**
      * 开始直播接口，接收app发送的视频信息和推流地址
@@ -41,7 +43,6 @@ public class LiveController {
     @ResponseBody
     ResponseMsg startLive(@RequestBody LiveReq liveReq){
         streamUrls.add(liveReq.streamUrl);
-
         return new ResponseMsg(Result.SUCCESS);
     }
 
@@ -59,7 +60,7 @@ public class LiveController {
         }else{
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
             urlRsp.streamUrl =  streamUrls.get(0);
-            urlRsp.resultUrl =  streamUrls.get(0);//Todo
+            urlRsp.resultUrl =  urlBasePath+ UUID.randomUUID();
             streamUrls.remove(0);
             return urlRsp;
         }
@@ -87,10 +88,10 @@ public class LiveController {
     ResponseMsg stopAndSaveLive(@RequestBody VideoReq videoReq){
         if (videoReq.streamUrl != null){
             streamUrls.remove(videoReq.streamUrl);
-
-            int vId = videoService.addVideo(new Video(videoReq));
+            Video video = new Video(videoReq);
+            videoService.addVideo(video);
+            Integer vId = video.getId();
             streamVideoMap.put(videoReq.streamUrl, vId);
-
             return new ResponseMsg(Result.SUCCESS);
         }
         return new ResponseMsg(Result.FAIL);
@@ -106,13 +107,10 @@ public class LiveController {
     @RequestMapping(value = "/isLiveStop")
     @ResponseBody
     LiveListRsp isLiveStop(@RequestBody String streamUrl){
-
-        for (String urls : streamUrls){
-            if (streamUrl.equals(urls)){
-                return new LiveListRsp(Result.FAIL);
-            }
-        }
-        return new LiveListRsp(Result.SUCCESS);
+        if(streamUrls.contains(streamUrl))
+            return new LiveListRsp(Result.FAIL);
+        else
+            return new LiveListRsp(Result.SUCCESS);
     }
 
 
