@@ -1,13 +1,9 @@
 package hku.droneflight.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import hku.droneflight.entity.Video;
 import hku.droneflight.service.VideoService;
-import hku.droneflight.util.LiveListRsp;
-import hku.droneflight.util.LiveReq;
-import hku.droneflight.util.ResponseMsg;
-import hku.droneflight.util.Result;
-import hku.droneflight.util.UrlRsp;
-import hku.droneflight.util.VideoReq;
+import hku.droneflight.util.*;
 
 import java.util.*;
 
@@ -27,7 +23,7 @@ public class LiveController {
 
     static List<String> streamUrls = new ArrayList<>();
     static Map<String,Integer> streamVideoMap = new HashMap<>();
-    static Map<String,Integer> streamUidMap = new HashMap<>();
+    static Map<String,String> streamResultMap = new HashMap<>();
 
     @Autowired
     VideoService videoService;
@@ -47,21 +43,20 @@ public class LiveController {
     }
 
     /**
-     * 查询是否有直播，返回streamUrls列表
+     * 查询是否有直播，返回第一个streamUrl和resultUrl
      * Result.FAIL表示没有直播
      * @return
      */
     @RequestMapping(value = "/isLiveStart")
     @ResponseBody
     UrlRsp isLiveStart(){
-
         if (streamUrls.isEmpty()){
             return new UrlRsp(Result.FAIL);
         }else{
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
             urlRsp.streamUrl =  streamUrls.get(0);
             urlRsp.resultUrl =  urlBasePath+ UUID.randomUUID();
-            streamUrls.remove(0);
+            streamResultMap.put(urlRsp.streamUrl,urlRsp.resultUrl);
             return urlRsp;
         }
     }
@@ -112,6 +107,68 @@ public class LiveController {
         else
             return new LiveListRsp(Result.SUCCESS);
     }
+
+    /**
+     * 获取所有直播url
+     * @return
+     */
+    @RequestMapping(value = "/getLive")
+    @ResponseBody
+    List<UrlRsp> getLiveUrlList(){
+        List<UrlRsp> urlRsps = new ArrayList<>();
+        for(String streamUrl:streamUrls){
+            UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
+            urlRsp.streamUrl =  streamUrl;
+            urlRsp.resultUrl =  streamResultMap.get(streamUrl);
+            urlRsps.add(urlRsp);
+        }
+        return urlRsps;
+
+
+    }
+
+    /**
+     * 获取所有本地视频
+     * @return
+     */
+    @RequestMapping(value = "/getVideo")
+    @ResponseBody
+    VideoListRsp getRecordUrlList(Integer uid){
+        List<Video> videos = videoService.getListByUid(uid);
+        if(videos.size()>0){
+            VideoListRsp videoListRsp =new VideoListRsp(Result.SUCCESS);
+            videoListRsp.videoList=videos;
+            return videoListRsp;
+        }
+        else{
+            return new VideoListRsp(Result.FAIL,"没有本地视频");
+        }
+    }
+
+    /**
+     * 根据url播放指定视频
+     * @return
+     */
+    @RequestMapping(value = "/playRecord")
+    @ResponseBody
+    VideoRsp playRecordVideo(String url){
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUrl,url);
+        Video video = videoService.getOne(queryWrapper);
+        if(video==null){
+            return new VideoRsp(Result.FAIL,"链接地址无效！");
+
+        }
+        else{
+            VideoRsp videoRsp= new VideoRsp(Result.SUCCESS);
+            videoRsp.video=video;
+            return videoRsp;
+        }
+    }
+
+
+
+
 
 
 }
