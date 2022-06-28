@@ -24,6 +24,7 @@ public class Video {
     private String name;
     private String description;
     private String url;
+    private String location;
     private long createTime;
 
     public Video(VideoReq videoReq) {

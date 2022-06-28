@@ -1,6 +1,7 @@
 package hku.droneflight.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import hku.droneflight.entity.User;
 import hku.droneflight.entity.Video;
 import hku.droneflight.service.VideoService;
 import hku.droneflight.util.*;
@@ -24,6 +25,8 @@ public class LiveController {
     static List<String> streamUrls = new ArrayList<>();
     static Map<String,Integer> streamVideoMap = new HashMap<>();
     static Map<String,String> streamResultMap = new HashMap<>();
+    static Map<String, User> streamUserMap = new HashMap<>();
+
 
     @Autowired
     VideoService videoService;
@@ -39,6 +42,8 @@ public class LiveController {
     @ResponseBody
     ResponseMsg startLive(@RequestBody LiveReq liveReq){
         streamUrls.add(liveReq.streamUrl);
+        User user = liveReq.user;
+        streamUserMap.put(liveReq.streamUrl,user);
         return new ResponseMsg(Result.SUCCESS);
     }
 
@@ -69,7 +74,16 @@ public class LiveController {
     @RequestMapping(value = "/stopLive")
     @ResponseBody
     ResponseMsg stopLive(@RequestBody LiveReq liveReq){
-        streamUrls.remove(liveReq.streamUrl);
+        //加个校验
+        if(streamUrls.contains(liveReq.streamUrl)){
+            streamUrls.remove(liveReq.streamUrl);
+        }
+        if(streamResultMap.containsKey(liveReq.streamUrl)){
+            streamResultMap.remove(liveReq.streamUrl);
+        }
+        if(streamUserMap.containsKey(liveReq.streamUrl)){
+            streamUserMap.remove(liveReq.streamUrl);
+        }
         return new ResponseMsg(Result.SUCCESS);
     }
 
@@ -82,7 +96,15 @@ public class LiveController {
     @ResponseBody
     ResponseMsg stopAndSaveLive(@RequestBody VideoReq videoReq){
         if (videoReq.streamUrl != null){
-            streamUrls.remove(videoReq.streamUrl);
+            if(streamUrls.contains(videoReq.streamUrl)){
+                streamUrls.remove(videoReq.streamUrl);
+            }
+            if(streamResultMap.containsKey(videoReq.streamUrl)){
+                streamResultMap.remove(videoReq.streamUrl);
+            }
+            if(streamUserMap.containsKey(videoReq.streamUrl)){
+                streamUserMap.remove(videoReq.streamUrl);
+            }
             Video video = new Video(videoReq);
             videoService.addVideo(video);
             Integer vId = video.getId();
@@ -112,19 +134,22 @@ public class LiveController {
      * 获取所有直播url
      * @return
      */
+    //加个list UrlRsp
+    //加个user
     @RequestMapping(value = "/getLive")
     @ResponseBody
-    List<UrlRsp> getLiveUrlList(){
+    UrlListRsp getLiveUrlList(){
         List<UrlRsp> urlRsps = new ArrayList<>();
         for(String streamUrl:streamUrls){
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
             urlRsp.streamUrl =  streamUrl;
             urlRsp.resultUrl =  streamResultMap.get(streamUrl);
+            urlRsp.user = streamUserMap.get(streamUrl);
             urlRsps.add(urlRsp);
         }
-        return urlRsps;
-
-
+        UrlListRsp urlListRsp = new UrlListRsp(Result.SUCCESS);
+        urlListRsp.urlRspList=urlRsps;
+        return urlListRsp;
     }
 
     /**
