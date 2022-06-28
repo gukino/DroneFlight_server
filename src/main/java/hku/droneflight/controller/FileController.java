@@ -61,9 +61,9 @@ public class FileController {
     }
 
 
-    @RequestMapping("/videoUpload/{streamUrl}")
+    @RequestMapping("/videoUpload")
     @ResponseBody()
-    public ResponseObject videoUpload(@PathVariable("streamUrl") String streamUrl, @RequestParam("fileName") MultipartFile file, Map<String, Object> map){
+    public ResponseObject videoUpload(@RequestParam("streamUrl") String streamUrl, @RequestParam("fileName") MultipartFile file, Map<String, Object> map){
         // 上传成功或者失败的提示
         ResponseObject ret = null;
         if (upload(file, videoBasePath, file.getOriginalFilename())){

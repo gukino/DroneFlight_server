@@ -123,8 +123,8 @@ public class LiveController {
      */
     @RequestMapping(value = "/isLiveStop")
     @ResponseBody
-    LiveListRsp isLiveStop(@RequestBody String streamUrl){
-        if(streamUrls.contains(streamUrl))
+    LiveListRsp isLiveStop(@RequestBody LiveReq liveReq){
+        if(streamUrls.contains(liveReq.streamUrl))
             return new LiveListRsp(Result.FAIL);
         else
             return new LiveListRsp(Result.SUCCESS);
