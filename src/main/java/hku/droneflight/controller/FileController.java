@@ -46,7 +46,7 @@ public class FileController {
     @RequestMapping(value = "video", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> showVideo(String fileName) {
         try {
-            return ResponseEntity.ok(resourceLoader.getResource(videoBasePath + fileName));
+            return ResponseEntity.ok(resourceLoader.getResource("file:" + videoBasePath + fileName));
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
@@ -54,7 +54,7 @@ public class FileController {
     @RequestMapping(value = "result", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> showResult(String fileName) {
         try {
-            return ResponseEntity.ok(resourceLoader.getResource(resultBasePath + fileName));
+            return ResponseEntity.ok(resourceLoader.getResource("file:" + resultBasePath + fileName));
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
