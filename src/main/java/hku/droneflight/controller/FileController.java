@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -46,7 +48,11 @@ public class FileController {
     @RequestMapping(value = "video", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> showVideo(String fileName) {
         try {
-            return ResponseEntity.ok(resourceLoader.getResource("file:" + videoBasePath + fileName));
+            HttpHeaders headers=new HttpHeaders();
+            headers.add("Content-Disposition", "attachment;filename="+fileName);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resourceLoader.getResource("file:" + videoBasePath + fileName));
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
