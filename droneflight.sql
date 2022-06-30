@@ -40,13 +40,14 @@ INSERT INTO `user` VALUES (1, '375664705@qq.com', '123456', '', NULL, 'hqj');
 -- Table structure for video
 -- ----------------------------
 DROP TABLE IF EXISTS `video`;
-CREATE TABLE `video`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `uid` int NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `description` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `url` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `createTime` bigint NOT NULL,
+CREATE TABLE IF NOT EXISTS `video` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT '',
+  `url` varchar(255) DEFAULT NULL,
+  `location` varchar(200) DEFAULT NULL,
+  `create_time` bigint(50) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
