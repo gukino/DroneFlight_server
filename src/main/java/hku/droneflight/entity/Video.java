@@ -27,6 +27,10 @@ public class Video {
     private String location;
     private long createTime;
 
+    public Video() {
+
+    }
+
     public Video(VideoReq videoReq) {
         this.uid = videoReq.uid;
         this.name = videoReq.name;

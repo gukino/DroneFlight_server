@@ -77,21 +77,23 @@ public class FileController {
             ret = getResult("success");
             ret.urlSuffix = "video?fileName=" + file.getOriginalFilename();
             Integer vid = streamVideoMap.get(streamUrl);
-            LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(vid!=null,Video::getId,vid);
-            Video video = videoService.getOne(queryWrapper);
+            Video video = videoService.getById(vid);
+            if (video == null) {
+                ret = getResult("fail");
+                ret.failReason = "user not save video";
+                return ret;
+            }
             video.setUrl(ret.urlSuffix);
             videoService.updateById(video);
-
         }else {
             ret = getResult("fail");
         }
         return ret;
     }
 
-    @RequestMapping("/resultUpload/")
+    @RequestMapping("/resultUpload")
     @ResponseBody()
-    public ResponseObject resultUpload(@RequestParam("fileName") MultipartFile file, Map<String, Object> map){
+    public ResponseObject resultUpload(@RequestParam("streamUrl") String streamUrl, @RequestParam("fileName") MultipartFile file, Map<String, Object> map){
         // 上传成功或者失败的提示
         ResponseObject ret = null;
         if (upload(file, resultBasePath, file.getOriginalFilename())){

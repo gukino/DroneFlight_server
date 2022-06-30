@@ -102,10 +102,14 @@ public class LiveController {
             if(streamResultMap.containsKey(videoReq.streamUrl)){
                 streamResultMap.remove(videoReq.streamUrl);
             }
-            if(streamUserMap.containsKey(videoReq.streamUrl)){
-                streamUserMap.remove(videoReq.streamUrl);
+            User user = streamUserMap.remove(videoReq.streamUrl);
+            if (user == null) {
+                ResponseMsg fail = new ResponseMsg(Result.FAIL);
+                fail.setFailReason("need input uid");
+                return fail;
             }
             Video video = new Video(videoReq);
+            video.setUid(user.getId());
             videoService.addVideo(video);
             Integer vId = video.getId();
             streamVideoMap.put(videoReq.streamUrl, vId);
