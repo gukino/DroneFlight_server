@@ -56,11 +56,28 @@ public class LiveController {
     @ResponseBody
     UrlRsp isLiveStart(){
         if (streamUrls.isEmpty()){
-            return new UrlRsp(Result.FAIL);
-        }else{
+            return new UrlRsp(Result.FAIL, "no live!");
+        } else if (streamResultMap.containsKey(streamUrls.get(0))){
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
-            urlRsp.streamUrl =  streamUrls.get(0);
-            urlRsp.resultUrl =  urlBasePath+ UUID.randomUUID();
+            urlRsp.streamUrl = streamUrls.get(0);
+            urlRsp.resultUrl = streamResultMap.get(urlRsp.streamUrl);
+            return urlRsp;
+        } else{
+            UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
+            urlRsp.streamUrl = streamUrls.get(0);
+            User user = streamUserMap.get(urlRsp.streamUrl);
+            if (user == null) {
+                return new UrlRsp(Result.FAIL, "the user has no live stream now");
+            }
+            //按照原有的rtmp域名来更改后缀，生成新的rtmp url
+            String[] split = urlRsp.streamUrl.split("/");
+            split[split.length - 1] = "stream-" + urlRsp.streamUrl.hashCode();
+            StringBuffer sb = new StringBuffer();
+            for (String s : split) {
+                sb.append(s);
+                sb.append("/");
+            }
+            urlRsp.resultUrl = sb.substring(0, sb.length() - 2);
             streamResultMap.put(urlRsp.streamUrl,urlRsp.resultUrl);
             return urlRsp;
         }
@@ -75,15 +92,9 @@ public class LiveController {
     @ResponseBody
     ResponseMsg stopLive(@RequestBody LiveReq liveReq){
         //加个校验
-        if(streamUrls.contains(liveReq.streamUrl)){
-            streamUrls.remove(liveReq.streamUrl);
-        }
-        if(streamResultMap.containsKey(liveReq.streamUrl)){
-            streamResultMap.remove(liveReq.streamUrl);
-        }
-        if(streamUserMap.containsKey(liveReq.streamUrl)){
-            streamUserMap.remove(liveReq.streamUrl);
-        }
+        streamUrls.remove(liveReq.streamUrl);
+        streamResultMap.remove(liveReq.streamUrl);
+        streamUserMap.remove(liveReq.streamUrl);
         return new ResponseMsg(Result.SUCCESS);
     }
 
@@ -96,12 +107,8 @@ public class LiveController {
     @ResponseBody
     ResponseMsg stopAndSaveLive(@RequestBody VideoReq videoReq){
         if (videoReq.streamUrl != null){
-            if(streamUrls.contains(videoReq.streamUrl)){
-                streamUrls.remove(videoReq.streamUrl);
-            }
-            if(streamResultMap.containsKey(videoReq.streamUrl)){
-                streamResultMap.remove(videoReq.streamUrl);
-            }
+            streamUrls.remove(videoReq.streamUrl);
+            streamResultMap.remove(videoReq.streamUrl);
             User user = streamUserMap.remove(videoReq.streamUrl);
             if (user == null) {
                 ResponseMsg fail = new ResponseMsg(Result.FAIL);
@@ -122,7 +129,6 @@ public class LiveController {
     /**
      * 查询指定streamUrl直播是否停止
      * Result.FAIL表示该url仍在直播
-     * @param streamUrl
      * @return
      */
     @RequestMapping(value = "/isLiveStop")
