@@ -38,12 +38,25 @@ public class FileController {
     @Value("${file.result.path}")
     private String resultBasePath;
 
+    @Value("${file.image.path}")
+    private String imageBasePath;
+
+
 
     @Autowired
     public FileController(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
+
+    @RequestMapping(value = "image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<?> showPhotos(String fileName) {
+        try {
+            return ResponseEntity.ok(resourceLoader.getResource("file:" + imageBasePath + fileName));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     @RequestMapping(value = "video", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> showVideo(String fileName) {
@@ -64,6 +77,20 @@ public class FileController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    @RequestMapping("imageUpload")
+    @ResponseBody()
+    public ResponseObject upload(@RequestParam("fileName") MultipartFile file, Map<String, Object> map){
+        // 上传成功或者失败的提示
+        ResponseObject ret = null;
+        if (upload(file, imageBasePath, file.getOriginalFilename())){
+            // 上传成功，给出页面提示
+            ret = getResult("success");
+            ret.urlSuffix = "image?fileName=" + file.getOriginalFilename();
+        }else {
+            ret = getResult("fail");
+        }
+        return ret;
     }
 
 
