@@ -1,6 +1,7 @@
 package hku.droneflight.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import hku.droneflight.util.VideoReq;
 import java.util.Date;
@@ -26,6 +27,8 @@ public class Video {
     private String url;
     private String location;
     private long createTime;
+    @TableField(exist = false)
+    public User user;
 
     public Video() {
 

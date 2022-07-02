@@ -179,12 +179,20 @@ public class LiveController {
      */
     @RequestMapping(value = "/getVideo")
     @ResponseBody
-    VideoListRsp getRecordUrlList(Integer uid) {
-        List<Video> videos = videoService.getListByUid(uid);
+    VideoListRsp getRecordUrlList(@RequestBody LiveReq liveReq) {
+        List<Video> videos = null;
+        if (liveReq.user.getId() > 0) {
+            videos = videoService.getListByUid(liveReq.user.getId());
+        } else {
+            videos = videoService.list();
+        }
+        for (Video video:videos) {
+            video.user = userService.getUserById(video.getUid());
+            video.user.setPwd(null); //防止用户密码泄露
+        }
         if (videos.size() > 0) {
             VideoListRsp videoListRsp = new VideoListRsp(Result.SUCCESS);
             videoListRsp.videoList = videos;
-            videoListRsp.user=userService.getUserById(uid);
             return videoListRsp;
         } else {
             return new VideoListRsp(Result.FAIL, "没有本地视频");
