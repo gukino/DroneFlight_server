@@ -22,11 +22,25 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class LiveController {
 
+
+    static class Stream{
+//        String streamUrl;
+        String resultUrl;
+        Integer VideoId;
+        Integer UserId;
+//        String serverId;
+
+        public Stream() {
+        }
+    }
+    //当前所有的stream
     static List<String> streamUrls = new ArrayList<>();
-    static Map<String, Integer> streamVideoMap = new HashMap<>();
-    static Map<String, String> streamResultMap = new HashMap<>();
-    static Map<String, User> streamUserMap = new HashMap<>();//最好用uid替代
+    //尚未分配的stream
     static Queue<String> availableStreams = new ArrayDeque<>();
+
+    //当前所有的stream的map
+    static Map<String, Stream> streamMap = new HashMap<>();
+    //server与stream的map
     static Map<String, String> severStreamMap = new HashMap<>();
 
     @Autowired
@@ -49,8 +63,9 @@ public class LiveController {
         streamUrls.add(liveReq.streamUrl);
         availableStreams.add(liveReq.streamUrl);
         Integer userId = liveReq.user.getId();
-        User user = userService.getUserById(userId);
-        streamUserMap.put(liveReq.streamUrl, user);
+        Stream stream= new Stream();
+        stream.UserId = userId;
+        streamMap.put(liveReq.streamUrl, stream);
         return new ResponseMsg(Result.SUCCESS);
     }
 
@@ -66,7 +81,7 @@ public class LiveController {
         if (severStreamMap.containsKey(serverId)) {
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
             urlRsp.streamUrl = severStreamMap.get(serverId);
-            urlRsp.resultUrl = streamResultMap.get(urlRsp.streamUrl);
+            urlRsp.resultUrl = streamMap.get(urlRsp.streamUrl).resultUrl;
             return urlRsp;
         } else {
             if (availableStreams.size()>0){
@@ -74,11 +89,11 @@ public class LiveController {
                 urlRsp.streamUrl = availableStreams.peek();
                 availableStreams.poll();
                 severStreamMap.put(serverId,urlRsp.streamUrl);
-                User user = streamUserMap.get(urlRsp.streamUrl);
 
-                if (user == null) {
+                if (streamMap.get(urlRsp.streamUrl).UserId == null) {
                     return new UrlRsp(Result.FAIL, "the user has no live stream now");
                 }
+
                 //按照原有的rtmp域名来更改后缀，生成新的rtmp url
                 String[] split = urlRsp.streamUrl.split("/");
                 split[split.length - 1] = "stream-" + urlRsp.streamUrl.hashCode();
@@ -88,7 +103,9 @@ public class LiveController {
                     sb.append("/");
                 }
                 urlRsp.resultUrl = sb.substring(0, sb.length() - 2);
-                streamResultMap.put(urlRsp.streamUrl, urlRsp.resultUrl);
+                Stream stream = streamMap.get(urlRsp.streamUrl);
+                stream.resultUrl = urlRsp.resultUrl;
+                streamMap.put(urlRsp.streamUrl, stream);
                 return urlRsp;
             }
             return new UrlRsp(Result.FAIL, "no live!");
@@ -137,8 +154,6 @@ public class LiveController {
     ResponseMsg stopLive(@RequestBody LiveReq liveReq) {
         //加个校验
         streamUrls.remove(liveReq.streamUrl);
-        streamResultMap.remove(liveReq.streamUrl);
-        streamUserMap.remove(liveReq.streamUrl);
         return new ResponseMsg(Result.SUCCESS);
     }
 
@@ -151,20 +166,21 @@ public class LiveController {
     @RequestMapping(value = "/stopAndSaveLive")
     @ResponseBody
     ResponseMsg stopAndSaveLive(@RequestBody VideoReq videoReq) {
-        if (videoReq.streamUrl != null) {
+        if (videoReq.streamUrl != null && streamUrls.contains(videoReq.streamUrl)) {
             streamUrls.remove(videoReq.streamUrl);
-            streamResultMap.remove(videoReq.streamUrl);
-            User user = streamUserMap.remove(videoReq.streamUrl);
-            if (user == null) {
+            Stream stream = streamMap.get(videoReq.streamUrl);
+
+            if (stream.UserId == null) {
                 ResponseMsg fail = new ResponseMsg(Result.FAIL);
                 fail.setFailReason("need input uid");
                 return fail;
             }
+
             Video video = new Video(videoReq);
-            video.setUid(user.getId());
+            video.setUid(stream.UserId);
             videoService.addVideo(video);
-            Integer vId = video.getId();
-            streamVideoMap.put(videoReq.streamUrl, vId);
+            stream.VideoId = video.getId();
+            streamMap.put(videoReq.streamUrl, stream);
             return new ResponseMsg(Result.SUCCESS);
         }
         return new ResponseMsg(Result.FAIL);
@@ -196,8 +212,9 @@ public class LiveController {
     UrlListRsp getLiveUrl(@RequestBody RequestMsg requestMsg) {
         List<Url> urls = new ArrayList<>();
         for (String streamUrl : streamUrls) {
-            if (requestMsg.user.getId().equals(streamUserMap.get(streamUrl).getId())){
-                Url url = new Url(streamUrl, streamResultMap.get(streamUrl));
+            Stream stream = streamMap.get(streamUrl);
+            if (requestMsg.user.getId().equals(stream.UserId)){
+                Url url = new Url(streamUrl, stream.resultUrl);
                 urls.add(url);
             }
         }
@@ -217,8 +234,9 @@ public class LiveController {
     UrlListRsp getLiveUrlList() {
         List<Url> urls = new ArrayList<>();
         for (String streamUrl : streamUrls) {
-            Url url = new Url(streamUrl, streamResultMap.get(streamUrl));
-            url.user = streamUserMap.get(streamUrl);
+            Stream stream = streamMap.get(streamUrl);
+            Url url = new Url(streamUrl, stream.resultUrl);
+            url.user = userService.getUserById(stream.UserId);
             urls.add(url);
         }
         UrlListRsp urlListRsp = new UrlListRsp(Result.SUCCESS);

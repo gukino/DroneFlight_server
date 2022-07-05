@@ -23,8 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import static hku.droneflight.controller.LiveController.streamVideoMap;
-
+import static hku.droneflight.controller.LiveController.streamMap;
 
 @Controller
 public class FileController {
@@ -103,7 +102,7 @@ public class FileController {
             // 上传成功，给出页面提示
             ret = getResult("success");
             ret.urlSuffix = "video?fileName=" + file.getOriginalFilename();
-            Integer vid = streamVideoMap.get(streamUrl);
+            Integer vid = streamMap.get(streamUrl).VideoId;
             Video video = videoService.getById(vid);
             if (video == null) {
                 ret = getResult("fail");
