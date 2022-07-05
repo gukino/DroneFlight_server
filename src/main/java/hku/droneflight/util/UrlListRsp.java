@@ -12,7 +12,8 @@ import java.util.Map;
  * @create 2022-06-28 17:50
  */
 public class UrlListRsp extends UrlRsp{
-    public List<UrlRsp> urlRspList =new ArrayList<>();
+
+    public List<Url> urlRspList;
     public UrlListRsp(Result result) {
         super(result);
     }

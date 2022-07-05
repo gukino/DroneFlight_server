@@ -1,6 +1,5 @@
 package hku.droneflight.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import hku.droneflight.entity.User;
 import hku.droneflight.entity.Video;
 import hku.droneflight.service.UserService;
@@ -26,7 +25,9 @@ public class LiveController {
     static List<String> streamUrls = new ArrayList<>();
     static Map<String, Integer> streamVideoMap = new HashMap<>();
     static Map<String, String> streamResultMap = new HashMap<>();
-    static Map<String, User> streamUserMap = new HashMap<>();
+    static Map<String, User> streamUserMap = new HashMap<>();//最好用uid替代
+    static Queue<String> availableStreams = new ArrayDeque<>();
+    static Map<String, String> severStreamMap = new HashMap<>();
 
     @Autowired
     UserService userService;
@@ -46,6 +47,7 @@ public class LiveController {
     @ResponseBody
     ResponseMsg startLive(@RequestBody LiveReq liveReq) {
         streamUrls.add(liveReq.streamUrl);
+        availableStreams.add(liveReq.streamUrl);
         Integer userId = liveReq.user.getId();
         User user = userService.getUserById(userId);
         streamUserMap.put(liveReq.streamUrl, user);
@@ -60,34 +62,69 @@ public class LiveController {
      */
     @RequestMapping(value = "/isLiveStart")
     @ResponseBody
-    UrlRsp isLiveStart() {
-        if (streamUrls.isEmpty()) {
-            return new UrlRsp(Result.FAIL, "no live!");
-        } else if (streamResultMap.containsKey(streamUrls.get(0))) {
+    UrlRsp isLiveStart(@RequestBody String serverId) {
+        if (severStreamMap.containsKey(serverId)) {
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
-            urlRsp.streamUrl = streamUrls.get(0);
+            urlRsp.streamUrl = severStreamMap.get(serverId);
             urlRsp.resultUrl = streamResultMap.get(urlRsp.streamUrl);
             return urlRsp;
         } else {
-            UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
-            urlRsp.streamUrl = streamUrls.get(0);
-            User user = streamUserMap.get(urlRsp.streamUrl);
-            if (user == null) {
-                return new UrlRsp(Result.FAIL, "the user has no live stream now");
+            if (availableStreams.size()>0){
+                UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
+                urlRsp.streamUrl = availableStreams.peek();
+                availableStreams.poll();
+                severStreamMap.put(serverId,urlRsp.streamUrl);
+                User user = streamUserMap.get(urlRsp.streamUrl);
+
+                if (user == null) {
+                    return new UrlRsp(Result.FAIL, "the user has no live stream now");
+                }
+                //按照原有的rtmp域名来更改后缀，生成新的rtmp url
+                String[] split = urlRsp.streamUrl.split("/");
+                split[split.length - 1] = "stream-" + urlRsp.streamUrl.hashCode();
+                StringBuffer sb = new StringBuffer();
+                for (String s : split) {
+                    sb.append(s);
+                    sb.append("/");
+                }
+                urlRsp.resultUrl = sb.substring(0, sb.length() - 2);
+                streamResultMap.put(urlRsp.streamUrl, urlRsp.resultUrl);
+                return urlRsp;
             }
-            //按照原有的rtmp域名来更改后缀，生成新的rtmp url
-            String[] split = urlRsp.streamUrl.split("/");
-            split[split.length - 1] = "stream-" + urlRsp.streamUrl.hashCode();
-            StringBuffer sb = new StringBuffer();
-            for (String s : split) {
-                sb.append(s);
-                sb.append("/");
-            }
-            urlRsp.resultUrl = sb.substring(0, sb.length() - 2);
-            streamResultMap.put(urlRsp.streamUrl, urlRsp.resultUrl);
-            return urlRsp;
+            return new UrlRsp(Result.FAIL, "no live!");
         }
     }
+
+//    @RequestMapping(value = "/isLiveStart/all")
+//    @ResponseBody
+//    UrlRsp isLiveStartAll() {
+//        if (streamUrls.isEmpty()) {
+//            return new UrlRsp(Result.FAIL, "no live!");
+//        } else if (streamResultMap.containsKey(streamUrls.get(0))) {
+//            UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
+//            urlRsp.streamUrl = streamUrls.get(0);
+//            urlRsp.resultUrl = streamResultMap.get(urlRsp.streamUrl);
+//            return urlRsp;
+//        } else {
+//            UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
+//            urlRsp.streamUrl = streamUrls.get(0);
+//            User user = streamUserMap.get(urlRsp.streamUrl);
+//            if (user == null) {
+//                return new UrlRsp(Result.FAIL, "the user has no live stream now");
+//            }
+//            //按照原有的rtmp域名来更改后缀，生成新的rtmp url
+//            String[] split = urlRsp.streamUrl.split("/");
+//            split[split.length - 1] = "stream-" + urlRsp.streamUrl.hashCode();
+//            StringBuffer sb = new StringBuffer();
+//            for (String s : split) {
+//                sb.append(s);
+//                sb.append("/");
+//            }
+//            urlRsp.resultUrl = sb.substring(0, sb.length() - 2);
+//            streamResultMap.put(urlRsp.streamUrl, urlRsp.resultUrl);
+//            return urlRsp;
+//        }
+//    }
 
     /**
      * 停止直播，不保存信息
@@ -150,25 +187,42 @@ public class LiveController {
     }
 
     /**
+     * 获取当前用户直播url
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getLiveByUid")
+    @ResponseBody
+    UrlListRsp getLiveUrl(@RequestBody RequestMsg requestMsg) {
+        List<Url> urls = new ArrayList<>();
+        for (String streamUrl : streamUrls) {
+            if (requestMsg.user.getId().equals(streamUserMap.get(streamUrl).getId())){
+                Url url = new Url(streamUrl, streamResultMap.get(streamUrl));
+                urls.add(url);
+            }
+        }
+        UrlListRsp urlListRsp = new UrlListRsp(Result.SUCCESS);
+        urlListRsp.urlRspList = urls;
+        return urlListRsp;
+    }
+
+
+    /**
      * 获取所有直播url
      *
      * @return
      */
-    //加个list UrlRsp
-    //加个user
-    @RequestMapping(value = "/getLive")
+    @RequestMapping(value = "/getLiveList")
     @ResponseBody
     UrlListRsp getLiveUrlList() {
-        List<UrlRsp> urlRsps = new ArrayList<>();
+        List<Url> urls = new ArrayList<>();
         for (String streamUrl : streamUrls) {
-            UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
-            urlRsp.streamUrl = streamUrl;
-            urlRsp.resultUrl = streamResultMap.get(streamUrl);
-            urlRsp.user = streamUserMap.get(streamUrl);
-            urlRsps.add(urlRsp);
+            Url url = new Url(streamUrl, streamResultMap.get(streamUrl));
+            url.user = streamUserMap.get(streamUrl);
+            urls.add(url);
         }
         UrlListRsp urlListRsp = new UrlListRsp(Result.SUCCESS);
-        urlListRsp.urlRspList = urlRsps;
+        urlListRsp.urlRspList = urls;
         return urlListRsp;
     }
 
