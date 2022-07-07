@@ -237,6 +237,7 @@ public class LiveController {
             Stream stream = streamMap.get(streamUrl);
             Url url = new Url(streamUrl, stream.resultUrl);
             url.user = userService.getUserById(stream.UserId);
+            url.user.setPwd(null); //防止用户密码泄露
             urls.add(url);
         }
         UrlListRsp urlListRsp = new UrlListRsp(Result.SUCCESS);
