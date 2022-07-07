@@ -77,10 +77,10 @@ public class LiveController {
      */
     @RequestMapping(value = "/isLiveStart")
     @ResponseBody
-    UrlRsp isLiveStart(@RequestBody String serverId) {
-        if (severStreamMap.containsKey(serverId)) {
+    UrlRsp isLiveStart(@RequestBody ServerReq serverReq) {
+        if (severStreamMap.containsKey(serverReq.serverId)) {
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
-            urlRsp.streamUrl = severStreamMap.get(serverId);
+            urlRsp.streamUrl = severStreamMap.get(serverReq.serverId);
             urlRsp.resultUrl = streamMap.get(urlRsp.streamUrl).resultUrl;
             return urlRsp;
         } else {
@@ -88,7 +88,7 @@ public class LiveController {
                 UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
                 urlRsp.streamUrl = availableStreams.peek();
                 availableStreams.poll();
-                severStreamMap.put(serverId,urlRsp.streamUrl);
+                severStreamMap.put(serverReq.serverId,urlRsp.streamUrl);
 
                 if (streamMap.get(urlRsp.streamUrl).UserId == null) {
                     return new UrlRsp(Result.FAIL, "the user has no live stream now");
