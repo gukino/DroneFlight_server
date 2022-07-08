@@ -172,6 +172,8 @@ public class LiveController {
     ResponseMsg stopLive(@RequestBody LiveReq liveReq) {
         //加个校验
         streamUrls.remove(liveReq.streamUrl);
+        severStreamMap.entrySet().removeIf(item -> Objects.equals(item.getValue(), liveReq.streamUrl));
+        streamMap.remove(liveReq.streamUrl);
         return new ResponseMsg(Result.SUCCESS);
     }
 
@@ -198,7 +200,10 @@ public class LiveController {
             video.setUid(stream.UserId);
             videoService.addVideo(video);
             stream.VideoId = video.getId();
-            streamMap.put(videoReq.streamUrl, stream);
+            //清除所有相关这个stream url的记录。只保留上面的video数据库
+            streamUrls.remove(videoReq.streamUrl);
+            severStreamMap.entrySet().removeIf(item -> Objects.equals(item.getValue(), videoReq.streamUrl));
+            streamMap.remove(videoReq.streamUrl);
             return new ResponseMsg(Result.SUCCESS);
         }
         return new ResponseMsg(Result.FAIL);
