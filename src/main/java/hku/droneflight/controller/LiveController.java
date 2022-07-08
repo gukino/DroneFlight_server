@@ -41,7 +41,9 @@ public class LiveController {
     //当前所有的stream的map
     static Map<String, Stream> streamMap = new HashMap<>();
     //server与stream的map
-    static Map<String, String> severStreamMap = new HashMap<>();
+    static Map<String, String> serverStreamMap = new HashMap<>();
+    //已经停止，但等待上传视频的stream map. key:streamUrl, value:Stream
+    static Map<String, Stream> stoppedStreamMap = new HashMap<>();
 
     @Autowired
     UserService userService;
@@ -96,9 +98,9 @@ public class LiveController {
         if (serverReq.serverId == null || serverReq.serverId.length() <=0) {
             return new UrlRsp(Result.FAIL, "no server id");
         }
-        if (severStreamMap.containsKey(serverReq.serverId)) {
+        if (serverStreamMap.containsKey(serverReq.serverId)) {
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
-            urlRsp.streamUrl = severStreamMap.get(serverReq.serverId);
+            urlRsp.streamUrl = serverStreamMap.get(serverReq.serverId);
             urlRsp.resultUrl = streamMap.get(urlRsp.streamUrl).resultUrl;
             return urlRsp;
         } else {
@@ -106,7 +108,7 @@ public class LiveController {
                 UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
                 urlRsp.streamUrl = availableStreams.peek();
                 availableStreams.poll();
-                severStreamMap.put(serverReq.serverId,urlRsp.streamUrl);
+                serverStreamMap.put(serverReq.serverId,urlRsp.streamUrl);
 
                 if (streamMap.get(urlRsp.streamUrl).UserId == null) {
                     return new UrlRsp(Result.FAIL, "the user has no live stream now");
@@ -170,11 +172,11 @@ public class LiveController {
     @RequestMapping(value = "/stopLive")
     @ResponseBody
     ResponseMsg stopLive(@RequestBody LiveReq liveReq) {
-        //加个校验
-        streamUrls.remove(liveReq.streamUrl);
-        severStreamMap.entrySet().removeIf(item -> Objects.equals(item.getValue(), liveReq.streamUrl));
-        streamMap.remove(liveReq.streamUrl);
-        return new ResponseMsg(Result.SUCCESS);
+        if (liveReq.streamUrl != null && streamUrls.contains(liveReq.streamUrl)) {
+            return stopLiveInner(liveReq.streamUrl);
+        } else {
+            return new ResponseMsg(Result.FAIL, "no stream url");
+        }
     }
 
     /**
@@ -201,12 +203,18 @@ public class LiveController {
             videoService.addVideo(video);
             stream.VideoId = video.getId();
             //清除所有相关这个stream url的记录。只保留上面的video数据库
-            streamUrls.remove(videoReq.streamUrl);
-            severStreamMap.entrySet().removeIf(item -> Objects.equals(item.getValue(), videoReq.streamUrl));
-            streamMap.remove(videoReq.streamUrl);
-            return new ResponseMsg(Result.SUCCESS);
+            return stopLiveInner(videoReq.streamUrl);
+        } else {
+            return new ResponseMsg(Result.FAIL, "no stream url");
         }
-        return new ResponseMsg(Result.FAIL);
+    }
+
+    private ResponseMsg stopLiveInner(String streamUrl) {
+        streamUrls.remove(streamUrl);
+        serverStreamMap.entrySet().removeIf(item -> Objects.equals(item.getValue(), streamUrl));
+        Stream stoppedStream = streamMap.remove(streamUrl);
+        stoppedStreamMap.put(streamUrl, stoppedStream);
+        return new ResponseMsg(Result.SUCCESS);
     }
 
 
