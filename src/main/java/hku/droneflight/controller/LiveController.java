@@ -60,6 +60,21 @@ public class LiveController {
     @RequestMapping(value = "/startLive")
     @ResponseBody
     ResponseMsg startLive(@RequestBody LiveReq liveReq) {
+        if (liveReq.streamUrl == null || liveReq.streamUrl.length() <= 0) {
+            return new ResponseMsg(Result.FAIL, "no stream url");
+        }
+        if (liveReq.user == null || liveReq.user.getId() == null || liveReq.user.getId() <= 0) {
+            return new ResponseMsg(Result.FAIL, "no uid");
+        }
+        if (streamUrls.contains(liveReq.streamUrl)) {
+            Stream stream = streamMap.get(liveReq.streamUrl);
+            if (Objects.equals(stream.UserId, liveReq.user.getId())) {
+                //已经启动过的，那就直接返回成功
+                return new ResponseMsg(Result.SUCCESS);
+            } else {
+                return new ResponseMsg(Result.FAIL, "stream url:" + liveReq.streamUrl + "has been used");
+            }
+        }
         streamUrls.add(liveReq.streamUrl);
         availableStreams.add(liveReq.streamUrl);
         Integer userId = liveReq.user.getId();
@@ -78,6 +93,9 @@ public class LiveController {
     @RequestMapping(value = "/isLiveStart")
     @ResponseBody
     UrlRsp isLiveStart(@RequestBody ServerReq serverReq) {
+        if (serverReq.serverId == null || serverReq.serverId.length() <=0) {
+            return new UrlRsp(Result.FAIL, "no server id");
+        }
         if (severStreamMap.containsKey(serverReq.serverId)) {
             UrlRsp urlRsp = new UrlRsp(Result.SUCCESS);
             urlRsp.streamUrl = severStreamMap.get(serverReq.serverId);
@@ -96,7 +114,7 @@ public class LiveController {
 
                 //按照原有的rtmp域名来更改后缀，生成新的rtmp url
                 String[] split = urlRsp.streamUrl.split("/");
-                split[split.length - 1] = "stream-" + urlRsp.streamUrl.hashCode();
+                split[split.length - 1] = "stream_" + Math.abs(urlRsp.streamUrl.hashCode());
                 StringBuffer sb = new StringBuffer();
                 for (String s : split) {
                     sb.append(s);
@@ -211,10 +229,19 @@ public class LiveController {
     @ResponseBody
     UrlListRsp getLiveUrl(@RequestBody RequestMsg requestMsg) {
         List<Url> urls = new ArrayList<>();
+        User user = userService.getUserById(requestMsg.user.getId());
+        if (user == null) {
+            //如果当前user不在数据库里，提前返回空list
+            UrlListRsp urlListRsp = new UrlListRsp(Result.SUCCESS);
+            urlListRsp.urlRspList = new ArrayList<>();
+            return urlListRsp;
+        }
+        user.setPwd(null); //防止用户密码泄露
         for (String streamUrl : streamUrls) {
             Stream stream = streamMap.get(streamUrl);
-            if (requestMsg.user.getId().equals(stream.UserId)){
+            if (user.getId().equals(stream.UserId)){
                 Url url = new Url(streamUrl, stream.resultUrl);
+                url.user = user;
                 urls.add(url);
             }
         }
@@ -237,7 +264,9 @@ public class LiveController {
             Stream stream = streamMap.get(streamUrl);
             Url url = new Url(streamUrl, stream.resultUrl);
             url.user = userService.getUserById(stream.UserId);
-            url.user.setPwd(null); //防止用户密码泄露
+            if (url.user != null) {
+                url.user.setPwd(null); //防止用户密码泄露
+            }
             urls.add(url);
         }
         UrlListRsp urlListRsp = new UrlListRsp(Result.SUCCESS);
