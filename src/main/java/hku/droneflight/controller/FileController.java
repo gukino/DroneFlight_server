@@ -31,7 +31,7 @@ import java.util.Map;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 
-import static hku.droneflight.controller.LiveController.streamMap;
+import static hku.droneflight.controller.LiveController.stoppedStreamMap;
 
 @Controller
 public class FileController {
@@ -171,7 +171,7 @@ public class FileController {
             // 上传成功，给出页面提示
             ret = getResult("success");
             ret.urlSuffix = "video?fileName=" + file.getOriginalFilename();
-            Integer vid = streamMap.get(streamUrl).VideoId;
+            Integer vid = stoppedStreamMap.get(streamUrl).VideoId;
             Video video = videoService.getById(vid);
             if (video == null) {
                 ret = getResult("fail");
@@ -180,6 +180,7 @@ public class FileController {
             }
             video.setUrl(ret.urlSuffix);
             videoService.updateById(video);
+            stoppedStreamMap.remove(streamUrl);
         }else {
             ret = getResult("fail");
         }
