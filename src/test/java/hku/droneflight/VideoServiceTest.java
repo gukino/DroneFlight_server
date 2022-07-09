@@ -1,6 +1,7 @@
 package hku.droneflight;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import hku.droneflight.controller.FileController;
 import hku.droneflight.entity.User;
 import hku.droneflight.entity.Video;
 import hku.droneflight.mapper.VideoMapper;
@@ -26,6 +27,8 @@ public class VideoServiceTest {
     VideoMapper videoMapper;
     @Autowired
     VideoService videoService;
+    @Autowired
+    FileController fileController;
 
     @Before
     public void before() throws Exception {
@@ -56,4 +59,9 @@ public class VideoServiceTest {
         System.out.println(videoService.getListByUid(1).toString());
     }
 
+    @Test
+    public void testGetVideo() throws Exception {
+        fileController.getV();
+//        System.out.println(fileController.getListByUid(1).toString());
+    }
 }

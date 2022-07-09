@@ -1,19 +1,25 @@
 package hku.droneflight.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import hku.droneflight.entity.ResultNum;
 import hku.droneflight.entity.Video;
 import hku.droneflight.service.VideoService;
+import hku.droneflight.util.Result;
+import hku.droneflight.util.ResultNumRsp;
+import hku.droneflight.util.StringReq;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import ws.schild.jave.EncoderException;
+import ws.schild.jave.MultimediaObject;
 
 import static hku.droneflight.controller.LiveController.streamMap;
 
@@ -39,6 +47,67 @@ public class FileController {
 
     @Value("${file.image.path}")
     private String imageBasePath;
+
+    /**
+     * 计算帧率和每秒平均个数
+     * @param stringReq //文件名
+     * @return ResultNumRsp //ResultNum列表
+     * @throws IOException
+     * @throws EncoderException
+     */
+    @RequestMapping(value = "/getResultNum")
+    @ResponseBody
+    public ResultNumRsp getResultNum(@RequestBody StringReq stringReq) throws IOException, EncoderException {
+        File file = resourceLoader.getResource("file:" + videoBasePath + stringReq.string +".mp4").getFile();
+        File result = resourceLoader.getResource("file:" + resultBasePath + stringReq.string +".txt").getFile();
+
+        try (Scanner sc = new Scanner(new FileReader(result))) {
+            ArrayList<String> fileString = new ArrayList<>();
+            int cnt = 0;
+
+            sc.useDelimiter("},");  //分隔符
+            while (sc.hasNext()) {   //按分隔符读取字符串
+                String str = sc.next();
+                fileString.add(str);
+                cnt++;
+            }
+            MultimediaObject m = new MultimediaObject(file);
+
+            int seconds = (int)m.getInfo().getDuration() / 1000;    //计算秒数
+//            System.out.println(seconds);
+
+            int fps = cnt / seconds;    //计算平均帧率
+//            System.out.println(fps);
+
+            cnt = 0;
+            ResultNum resultNum = new ResultNum();
+            List<ResultNum> resultNumList = new ArrayList<>();
+            for (String str : fileString){
+                for (String s : str.split(",")){
+                    String type = s.split("\"")[1];
+                    String sNum = s.split(": ")[1];
+                    if (sNum.contains("}]")){
+                        sNum = sNum.split("}")[0];
+                    }
+                    int num = Integer.parseInt(sNum);
+
+                    resultNum.add(type, num);
+                }
+                if (cnt >= fps){
+                    resultNum.divide(fps);
+                    resultNumList.add(resultNum);
+                    System.out.println(resultNum.toString());
+                    resultNum = new ResultNum();
+                    cnt = 0;
+                }
+                cnt++;
+            }
+            return new ResultNumRsp(Result.SUCCESS, resultNumList);
+        }catch (Exception exception){
+            System.out.println(exception.toString());
+            return new ResultNumRsp(Result.SUCCESS, exception.toString());
+        }
+    }
 
 
 
