@@ -294,10 +294,10 @@ public class LiveController {
      */
     @RequestMapping(value = "/getVideo")
     @ResponseBody
-    VideoListRsp getRecordUrlList(@RequestBody LiveReq liveReq) {
+    VideoListRsp getRecordUrlList(@RequestBody RequestMsg requestMsg) {
         List<Video> videos = null;
-        if (liveReq.user.getId() > 0) {
-            videos = videoService.getListByUid(liveReq.user.getId());
+        if (requestMsg.user.getId() > 0) {
+            videos = videoService.getListByUid(requestMsg.user.getId());
         } else {
             videos = videoService.list();
         }

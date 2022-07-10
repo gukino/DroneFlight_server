@@ -57,9 +57,12 @@ public class FileController {
      */
     @RequestMapping(value = "/getResultNum")
     @ResponseBody
-    public ResultNumRsp getResultNum(@RequestBody StringReq stringReq) throws IOException, EncoderException {
-        File file = resourceLoader.getResource("file:" + videoBasePath + stringReq.string +".mp4").getFile();
-        File result = resourceLoader.getResource("file:" + resultBasePath + stringReq.string +".txt").getFile();
+    public ResultNumRsp getResultNum(@RequestBody StringReq stringReq) throws IOException {
+        Video video = videoService.getById(stringReq.string);
+        if (video == null) return new ResultNumRsp(Result.FAIL,"no such video.");
+        String fileName = video.getUrl().split("=")[1];
+        File file = resourceLoader.getResource("file:" + videoBasePath + fileName +".mp4").getFile();
+        File result = resourceLoader.getResource("file:" + resultBasePath + fileName +".txt").getFile();
 
         try (Scanner sc = new Scanner(new FileReader(result))) {
             ArrayList<String> fileString = new ArrayList<>();
