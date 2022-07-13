@@ -10,4 +10,8 @@ public class StringReq extends RequestMsg{
     public StringReq(String string) {
         this.string = string;
     }
+
+    public StringReq() {
+
+    }
 }
