@@ -5,10 +5,10 @@ package hku.droneflight.util;
  */
 
 public class StringReq extends RequestMsg{
-    public String string;
+    public String videoId;
 
     public StringReq(String string) {
-        this.string = string;
+        this.videoId = string;
     }
 
     public StringReq() {

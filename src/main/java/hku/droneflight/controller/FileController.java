@@ -58,9 +58,9 @@ public class FileController {
     @RequestMapping(value = "/getResultNum")
     @ResponseBody
     public ResultNumRsp getResultNum(@RequestBody StringReq stringReq) throws IOException {
-        Video video = videoService.getById(stringReq.string);
+        Video video = videoService.getById(stringReq.videoId);
         if (video == null) return new ResultNumRsp(Result.FAIL,"no such video.");
-        String fileName = video.getUrl().split("=")[1];
+        String fileName = video.getUrl().split("fileName=")[1].split(".mp4")[0];
         File file = resourceLoader.getResource("file:" + videoBasePath + fileName +".mp4").getFile();
         File result = resourceLoader.getResource("file:" + resultBasePath + fileName +".txt").getFile();
 
@@ -108,7 +108,7 @@ public class FileController {
             return new ResultNumRsp(Result.SUCCESS, resultNumList);
         }catch (Exception exception){
             System.out.println(exception.toString());
-            return new ResultNumRsp(Result.SUCCESS, exception.toString());
+            return new ResultNumRsp(Result.FAIL, exception.toString());
         }
     }
 
