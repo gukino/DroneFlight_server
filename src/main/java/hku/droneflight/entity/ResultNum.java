@@ -16,9 +16,9 @@ public class ResultNum {
     }
 
     public ResultNum divide(int divisor){
-        this.withMask /= divisor;
-        this.withoutMask /= divisor;
-        this.unKnown /= divisor;
+        this.withMask = Math.round( (float)withMask / divisor);
+        this.withoutMask = Math.round( (float)withoutMask / divisor);
+        this.unKnown = Math.round( (float)unKnown / divisor);
         return this;
     }
 
