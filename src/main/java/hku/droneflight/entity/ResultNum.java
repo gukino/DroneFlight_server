@@ -26,10 +26,13 @@ public class ResultNum {
         switch (type) {
             case "0":
                 this.withMask += num;
+                break;
             case "1":
                 this.withoutMask += num;
+                break;
             case "2":
                 this.unKnown += num;
+                break;
         }
         return this;
     }
