@@ -81,7 +81,7 @@
     </dependency>
     <dependency>
       <groupId>ws.schild</groupId>
-      <artifactId>jave-native-win64</artifactId>
+      <artifactId>jave-all-deps</artifactId>
       <version>2.4.6</version>
     </dependency>
 
